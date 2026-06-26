@@ -4,23 +4,22 @@ const axios = require("axios");
 const app = express();
 app.use(express.json());
 
-// 🔑 CONFIGURATION
-const API_KEY = "https://api-checkout.cinetpay.com/v2/payment";   // ← remplace
-const SITE_ID = "587";              // sandbox pour test
+// 🔑 CONFIG (REMPLACE CES VALEURS)
+const API_KEY = "sk_test_0hZHfZ5G1LgLTvLjnnuicOTV";
+const SITE_ID = "587"; // sandbox test
+const ACCESS_TOKEN = "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";
 
 const SHOP = "clicassistpro.myshopify.com";
-const ACCESS_TOKEN = "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";  // ← remplace
 
-// ✅ ROUTE DE PAIEMENT
+// ✅ ROUTE PAIEMENT
 app.get("/pay", async (req, res) => {
-
     const { amount, order_id } = req.query;
     const transaction_id = "CMD_" + Date.now();
 
     try {
 
         const response = await axios.post(
-            "https://api-checkout.cinetpay.com/v2/payment",
+            "https://checkout.cinetpay.com/v2/payment",
             {
                 apikey: API_KEY,
                 site_id: SITE_ID,
@@ -39,30 +38,23 @@ app.get("/pay", async (req, res) => {
             }
         );
 
-        console.log("CinetPay response:", response.data);
-
         res.redirect(response.data.data.payment_url);
 
     } catch (error) {
-
-        console.log("Erreur complète:", error.response?.data || error.message);
-
+        console.log("Erreur paiement :", error.response?.data || error.message);
         res.send(error.response?.data || error.message);
     }
 });
 
 
-// ✅ WEBHOOK (confirmation paiement)
+// ✅ WEBHOOK
 app.post("/webhook", async (req, res) => {
 
     try {
         const transaction_id = req.body.transaction_id;
 
-        console.log("Webhook reçu:", req.body);
-
-        // Vérifier paiement
         const check = await axios.post(
-            "https://api-checkout.cinetpay.com/v2/payment/check",
+            "https://checkout.cinetpay.com/v2/payment/check",
             {
                 apikey: API_KEY,
                 site_id: SITE_ID,
@@ -79,9 +71,6 @@ app.post("/webhook", async (req, res) => {
 
             const order_id = check.data.data.metadata;
 
-            console.log("Paiement accepté pour commande:", order_id);
-
-            // ✅ Met à jour Shopify
             await axios.put(
                 `https://${SHOP}/admin/api/2023-10/orders/${order_id}.json`,
                 {
@@ -102,9 +91,7 @@ app.post("/webhook", async (req, res) => {
         res.send("OK");
 
     } catch (error) {
-
-        console.log("Erreur webhook:", error.response?.data || error.message);
-
+        console.log("Erreur webhook :", error.response?.data || error.message);
         res.send("Erreur webhook");
     }
 });
@@ -112,11 +99,11 @@ app.post("/webhook", async (req, res) => {
 
 // ✅ PAGE SUCCESS
 app.get("/success", (req, res) => {
-    res.send("✅ Paiement effectué avec succès !");
+    res.send("✅ Paiement réussi !");
 });
 
 
-// ✅ LANCEMENT SERVEUR
+// ✅ SERVER
 app.listen(process.env.PORT || 3000, () => {
-    console.log("Serveur démarré ✅");
+    console.log("Server OK ✅");
 });

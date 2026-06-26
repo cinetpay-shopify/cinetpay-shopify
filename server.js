@@ -4,8 +4,8 @@ const axios = require("axios");
 const app = express();
 app.use(express.json());
 
-const API_KEY = "ICI_API_CINETPAY";
-const SITE_ID = "ICI_SITE_ID";
+const API_KEY = "sk_test_0hZHfZ5G1LgLTvLjnnuicOTV";
+const SITE_ID = "587";
 
 const SHOP = "clicassistpro.myshopify.com";
 const ACCESS_TOKEN = "ICI_ACCESS_TOKEN";
